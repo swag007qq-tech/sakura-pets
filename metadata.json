@@ -1,0 +1,6 @@
+{
+  "name": "Sakura Pets",
+  "description": "Sakura Pets — уютный каталог питомцев с корзиной, избранным, музыкальным плеером, отзывами и панелью администратора.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
