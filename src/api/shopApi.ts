@@ -398,9 +398,6 @@ export async function createAdminProduct(
   const newId = createId();
 
   const cleanBadges = normalizeBadges(payload.badges);
-  if (cleanBadges.length === 0) {
-    throw new Error('Выберите хотя бы один значок (F, R, N или M)');
-  }
 
   const supabase = getSupabase();
   if (supabase) {
@@ -470,9 +467,6 @@ export async function updateAdminProduct(
   const nowIso = new Date().toISOString();
 
   const cleanBadges = normalizeBadges(payload.badges);
-  if (cleanBadges.length === 0) {
-    throw new Error('Выберите хотя бы один значок (F, R, N или M)');
-  }
 
   const supabase = getSupabase();
   if (supabase) {

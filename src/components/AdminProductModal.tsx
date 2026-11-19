@@ -163,10 +163,6 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
       setError('Укажите корректную цену (число не меньше 0)');
       return;
     }
-    if (badges.length === 0) {
-      setError('Обязательно выберите хотя бы один значок (F, R, N или M)');
-      return;
-    }
     if (!Number.isInteger(parsedStock) || parsedStock < 0) {
       setError('Количество в наличии должно быть целым числом (>= 0)');
       return;
@@ -334,12 +330,11 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
                 />
               </div>
 
-              {/* Mandatory Pet Badges Selector (F, R, N, M) */}
+              {/* Optional Pet Badges Selector (F, R, N, M) */}
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="block text-xs font-medium text-[#9A4674]">
-                    Значки (обязательно выберите один или несколько){' '}
-                    <span className="text-[#D93A73]">*</span>
+                    Значки / редкость (необязательно — можно не выбирать)
                   </span>
                 </div>
 
