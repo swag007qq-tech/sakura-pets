@@ -31,7 +31,8 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password.trim()) {
+    const cleanPassword = password.trim();
+    if (!cleanPassword) {
       setError('Введите пароль администратора');
       return;
     }
@@ -39,7 +40,7 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
     setSubmitting(true);
     setError(null);
     try {
-      const session = await loginAdmin(password);
+      const session = await loginAdmin(cleanPassword);
       onSuccess(session.expiresAt, session.inactivityTimeoutMs);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Неверный пароль администратора');

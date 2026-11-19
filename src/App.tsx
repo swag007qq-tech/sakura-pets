@@ -17,10 +17,13 @@ import { RELAX_TRACKS } from './data/tracks';
 import { CartItem, PetSlot } from './types/store';
 import {
   AdminAuthError,
+  StorageMode,
   checkAdminSession,
   deleteAdminProduct,
   fetchProducts,
+  getStorageMode,
   logoutAdmin,
+  subscribeCatalogUpdates,
 } from './api/shopApi';
 
 const PLACEHOLDER_SLOTS: PetSlot[] = [1, 2, 3, 4, 5, 6].map((slotNumber) => ({
@@ -56,7 +59,7 @@ export default function App() {
   // Cloud / Server Shared Catalog State
   const [products, setProducts] = useState<PetSlot[]>([]);
   const [catalogLoaded, setCatalogLoaded] = useState(false);
-  const [storageMode, setStorageMode] = useState<'supabase' | 'server-db'>('server-db');
+  const [storageMode, setStorageMode] = useState<StorageMode>(() => getStorageMode());
   const [currentPage, setCurrentPage] = useState(1);
 
   // Admin Session & Modals State
@@ -125,27 +128,13 @@ export default function App() {
     }
   }, []);
 
-  // Initial load + Server-Sent Events real-time subscription + periodic/focus refresh
+  // Initial load + cross-tab / local / optional Supabase sync (works 100% without Express server)
   useEffect(() => {
     void syncCatalog();
 
-    let es: EventSource | null = null;
-    try {
-      es = new EventSource('/api/products/stream');
-      es.addEventListener('products_updated', (event: MessageEvent) => {
-        try {
-          const parsed = JSON.parse(event.data) as { products?: PetSlot[] };
-          if (Array.isArray(parsed.products)) {
-            setProducts(parsed.products);
-            setCatalogLoaded(true);
-          }
-        } catch {
-          // Ignore malformed event
-        }
-      });
-    } catch {
-      // Fallback polling below handles environments without SSE
-    }
+    const unsubscribe = subscribeCatalogUpdates(() => {
+      void syncCatalog();
+    });
 
     const pollInterval = window.setInterval(() => {
       void syncCatalog();
@@ -164,7 +153,7 @@ export default function App() {
     window.addEventListener('online', handleOnline);
 
     return () => {
-      es?.close();
+      unsubscribe();
       window.clearInterval(pollInterval);
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('online', handleOnline);
@@ -534,7 +523,7 @@ export default function App() {
                     </div>
                     <div className="text-[11px] text-[#9A4674] truncate">
                       Товаров в каталоге: {products.length} ·{' '}
-                      {storageMode === 'supabase' ? 'Supabase Cloud' : 'Общая база сервера'}
+                      {storageMode === 'supabase' ? 'Supabase Cloud' : 'Локальное хранилище'}
                     </div>
                   </div>
                 </div>

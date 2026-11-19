@@ -308,7 +308,7 @@ export const AdminProductModal: React.FC<AdminProductModalProps> = ({
                     )}
 
                     <p className="text-[11px] text-[#B8769A]">
-                      JPG, PNG, WEBP, GIF до 8 МБ. Фото сохраняется в облаке/на сервере.
+                      JPG, PNG, WEBP, GIF до 8 МБ.
                     </p>
                   </div>
                 </div>

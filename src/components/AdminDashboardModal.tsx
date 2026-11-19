@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { PetSlot } from '../types/store';
 import {
   AdminAuthError,
+  StorageMode,
   updateAdminProduct,
   uploadProductPhoto,
 } from '../api/shopApi';
@@ -28,7 +29,7 @@ export type AdminSection = 'products' | 'pricing' | 'photos';
 interface AdminDashboardModalProps {
   open: boolean;
   products: PetSlot[];
-  storageMode: 'supabase' | 'server-db';
+  storageMode: StorageMode;
   onClose: () => void;
   onAddProduct: () => void;
   onEditProduct: (product: PetSlot) => void;
@@ -246,7 +247,7 @@ export const AdminDashboardModal: React.FC<AdminDashboardModalProps> = ({
                   </h2>
                   <p className="text-xs text-[#9A4674] truncate">
                     Товаров в базе: {products.length} ·{' '}
-                    {storageMode === 'supabase' ? 'Supabase Cloud' : 'Общая БД сервера'}
+                    {storageMode === 'supabase' ? 'Supabase Cloud' : 'Локальное хранилище'}
                   </p>
                 </div>
               </div>
