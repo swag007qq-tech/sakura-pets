@@ -1,11 +1,12 @@
--- Sakura Pets: Supabase PostgreSQL Schema & Storage Policies
--- Run this SQL once in your Supabase project's SQL Editor if connecting Supabase Cloud.
+-- Sakura Pets: готові таблиця товарів, Storage-бакет та політики публічного доступу для роботи напряму з фронтенду (Vercel / Vite)
+-- Скопіюйте весь код нижче у Supabase → SQL Editor → Run
 
+-- 1. Таблиця товарів
 create table if not exists public.products (
   id text primary key,
   name text not null,
   description text not null default '',
-  price numeric not null check (price >= 0),
+  price numeric not null default 0 check (price >= 0),
   currency text not null default 'грн',
   badges jsonb not null default '[]'::jsonb,
   stock integer not null default 1 check (stock >= 0),
@@ -16,23 +17,72 @@ create table if not exists public.products (
   updated_at timestamptz not null default now()
 );
 
--- Enable Row Level Security so public/anon keys can ONLY read products, never mutate them.
--- All admin mutations run through the Express backend using SUPABASE_SERVICE_ROLE_KEY after password verification.
+create index if not exists products_created_at_idx
+  on public.products (created_at asc);
+
+-- 2. Публічний доступ до таблиці products (читання та запис через anon key на фронтенді)
 alter table public.products enable row level security;
 
 drop policy if exists "Public can read products" on public.products;
 create policy "Public can read products"
   on public.products
   for select
+  to public
   using (true);
 
--- Storage bucket for product photos (public read, server-only write via service_role)
+drop policy if exists "Public can insert products" on public.products;
+create policy "Public can insert products"
+  on public.products
+  for insert
+  to public
+  with check (true);
+
+drop policy if exists "Public can update products" on public.products;
+create policy "Public can update products"
+  on public.products
+  for update
+  to public
+  using (true)
+  with check (true);
+
+drop policy if exists "Public can delete products" on public.products;
+create policy "Public can delete products"
+  on public.products
+  for delete
+  to public
+  using (true);
+
+-- 3. Сховище (Storage) для фотографій товарів
 insert into storage.buckets (id, name, public)
 values ('product-images', 'product-images', true)
-on conflict (id) do nothing;
+on conflict (id) do update set public = true;
 
+-- 4. Публічний доступ до фото в бакеті product-images (перегляд, завантаження, заміна, видалення)
 drop policy if exists "Public can view product images" on storage.objects;
 create policy "Public can view product images"
   on storage.objects
   for select
+  to public
+  using (bucket_id = 'product-images');
+
+drop policy if exists "Public can upload product images" on storage.objects;
+create policy "Public can upload product images"
+  on storage.objects
+  for insert
+  to public
+  with check (bucket_id = 'product-images');
+
+drop policy if exists "Public can update product images" on storage.objects;
+create policy "Public can update product images"
+  on storage.objects
+  for update
+  to public
+  using (bucket_id = 'product-images')
+  with check (bucket_id = 'product-images');
+
+drop policy if exists "Public can delete product images" on storage.objects;
+create policy "Public can delete product images"
+  on storage.objects
+  for delete
+  to public
   using (bucket_id = 'product-images');
